@@ -9,11 +9,11 @@
     <meta name="theme-color" content="#000000">
     <title>Mustafa.EDU</title>
     <link rel="icon" href="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg" type="image/jpeg">
-    <link rel="manifest" href="data:application/json;charset=utf-8;base64,ewogICJuYW1lIjogIk11c3RhZmEuRURVIiwKICAic2hvcnRfbmFtZSI6ICJNdXN0YWZhLkVEVSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3IiOiAiIzAwMDAwMCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLnNvbG8udG8vdXNlci9hLzY2OGQ5NGJhYzFhNzc0XzkyNDgyMjQ4LmpwZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4uc29sby50by91c2VyL2EvNjY4ZDk0YmFjMWE3NzRfOTI0ODIyNDguanBnIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIgogICAgfQogIF0KfQ==">
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk11c3RhZmEuRURVIiwKICAic2hvcnRfbmFtZSI6ICJNdXN0YWZhLkVEVSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3IiOiAiIzAwMDAwMCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLnNvbG8udG8vdXNlci9hLzY2OGQ5NGJhYzFhNzc0XzkyNDgyMjQ4LmpwZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4uc29sby50by91c2VyL2EvNjY4ZDk0YmFjMWE3NzRfOTI0ODIyNDguanBnIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIgogICAgfQogIF0KfQ==">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Splash Screen Styles */
+        /* Splash Screen */
         .splash-screen {
             position: fixed;
             top: 0;
@@ -714,6 +714,17 @@
             line-height: 1.6;
         }
 
+        /* Fast typing animation */
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(1px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .typing-text span {
+            opacity: 0;
+            animation: appear 0.03s forwards;
+        }
+
         /* Mobile Responsiveness */
         @media (max-width: 768px) {
             .sidebar {
@@ -758,17 +769,18 @@
                 padding: 10px 12px;
                 font-size: 14px;
             }
-        }
-
-        /* Fast typing animation */
-        @keyframes appear {
-            from { opacity: 0; transform: translateY(1px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .typing-text span {
-            opacity: 0;
-            animation: appear 0.03s forwards;
+            
+            /* Disable text selection on mobile */
+            body {
+                -webkit-user-select: none;
+                user-select: none;
+            }
+            
+            /* Enable text selection only in input areas */
+            #user-input, .message-text {
+                -webkit-user-select: text;
+                user-select: text;
+            }
         }
     </style>
 </head>
@@ -782,7 +794,7 @@
         </div>
     </div>
 
-    <!-- Install Button (hidden by default) -->
+    <!-- Install Button -->
     <button class="install-btn" id="install-btn">
         <i class="fas fa-download"></i>
         Install App
@@ -969,7 +981,7 @@
 
         function setupMobileAppBehavior() {
             // Set full height
-            document.body.style.height = window.innerHeight + 'px';
+            document.documentElement.style.height = `${window.innerHeight}px`;
             
             // Hide browser UI by scrolling
             window.scrollTo(0, 1);
@@ -981,18 +993,24 @@
             document.addEventListener('gesturestart', function(e) {
                 e.preventDefault();
             });
+            document.documentElement.style.touchAction = 'manipulation';
             
             // Prevent touch scrolling except in scrollable areas
             document.addEventListener('touchmove', function(e) {
                 if (!e.target.classList.contains('history-container') && 
-                    !e.target.classList.contains('chat-container')) {
+                    !e.target.classList.contains('chat-container') &&
+                    !e.target.closest('.history-container') && 
+                    !e.target.closest('.chat-container')) {
                     e.preventDefault();
                 }
             }, { passive: false });
             
             // Handle keyboard showing
             window.addEventListener('resize', () => {
-                document.body.style.height = window.innerHeight + 'px';
+                document.documentElement.style.height = `${window.innerHeight}px`;
+                setTimeout(() => {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 300);
             });
         }
 
@@ -1033,17 +1051,9 @@
             });
             
             sendButton.addEventListener('click', sendMessage);
-            
-            // New chat button
             newChatBtn.addEventListener('click', startNewChat);
-            
-            // Menu toggle
             menuToggle.addEventListener('click', toggleSidebar);
-            
-            // Stop button
             stopButton.addEventListener('click', stopGeneration);
-            
-            // Theme toggle
             themeToggle.addEventListener('click', toggleTheme);
             
             // Image attachment
@@ -1122,15 +1132,636 @@
             }
         }
 
-        // Rest of your existing functions remain the same...
-        // (All the functions from the original code should be included here)
-        // I've included the key changes above, but the complete implementation
-        // would include all your original functions as well.
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            if (sidebar.classList.contains('active')) {
+                history.pushState({ sidebar: 'open' }, '');
+            } else {
+                history.pushState({ sidebar: 'closed' }, '');
+            }
+        }
 
-        // For brevity, I haven't repeated all the original functions here,
-        // but they should be included in the final implementation.
-        // The key changes are the mobile app behavior setup and PWA features.
+        function autoResizeTextarea() {
+            userInput.addEventListener('input', () => {
+                userInput.style.height = 'auto';
+                userInput.style.height = (userInput.scrollHeight) + 'px';
+            });
+        }
 
+        function startNewChat() {
+            if (chatContainer.children.length > 1 || (chatContainer.children.length === 1 && !welcomeVisible)) {
+                saveCurrentChat();
+            }
+            
+            chatContainer.innerHTML = '';
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            welcomeVisible = true;
+            showWelcomeMessage();
+            hideImageUpload();
+            userInput.focus();
+            
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector('.history-item').classList.add('active');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function saveCurrentChat() {
+            const messages = [];
+            const messageElements = chatContainer.querySelectorAll('.message');
+            
+            messageElements.forEach(el => {
+                const role = el.classList.contains('user-message') ? 'user' : 'assistant';
+                const content = el.querySelector('.message-text').textContent.trim();
+                messages.push({ role, content });
+            });
+            
+            if (messages.length > 0) {
+                const title = messages[0].content.substring(0, 30) + (messages[0].content.length > 30 ? '...' : '');
+                const timestamp = new Date().toISOString();
+                
+                chatHistory.unshift({
+                    title,
+                    messages,
+                    timestamp
+                });
+                
+                if (chatHistory.length > 100) {
+                    chatHistory.pop();
+                }
+                
+                updateHistoryUI();
+                localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+            }
+        }
+
+        function loadChatHistory() {
+            const savedHistory = localStorage.getItem('chatHistory');
+            if (savedHistory) {
+                try {
+                    chatHistory = JSON.parse(savedHistory);
+                    updateHistoryUI();
+                } catch (e) {
+                    console.error("Error loading chat history:", e);
+                    localStorage.removeItem('chatHistory');
+                }
+            }
+        }
+
+        function updateHistoryUI() {
+            const historyContainer = document.getElementById('history-container');
+            const sections = historyContainer.querySelectorAll('.history-section');
+            for (let i = 1; i < sections.length; i++) {
+                sections[i].remove();
+            }
+            
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            const todayChats = [];
+            const yesterdayChats = [];
+            const weekChats = [];
+            const olderChats = [];
+            
+            chatHistory.forEach((chat, index) => {
+                const chatDate = new Date(chat.timestamp);
+                
+                if (isSameDay(chatDate, today)) {
+                    todayChats.push(chat);
+                } else if (isSameDay(chatDate, yesterday)) {
+                    yesterdayChats.push(chat);
+                } else if (daysBetween(chatDate, today) <= 7) {
+                    weekChats.push(chat);
+                } else {
+                    olderChats.push(chat);
+                }
+            });
+            
+            if (todayChats.length > 0) {
+                const todaySection = document.createElement('div');
+                todaySection.className = 'history-section';
+                todaySection.innerHTML = '<div class="section-title">Today</div>';
+                
+                todayChats.forEach(chat => {
+                    const item = createHistoryItem(chat);
+                    todaySection.appendChild(item);
+                });
+                
+                historyContainer.insertBefore(todaySection, sections[0].nextSibling);
+            }
+            
+            if (yesterdayChats.length > 0) {
+                const yesterdaySection = document.createElement('div');
+                yesterdaySection.className = 'history-section';
+                yesterdaySection.innerHTML = '<div class="section-title">Yesterday</div>';
+                
+                yesterdayChats.forEach(chat => {
+                    const item = createHistoryItem(chat);
+                    yesterdaySection.appendChild(item);
+                });
+                
+                historyContainer.insertBefore(yesterdaySection, sections[0].nextSibling);
+            }
+            
+            if (weekChats.length > 0) {
+                const weekSection = document.createElement('div');
+                weekSection.className = 'history-section';
+                weekSection.innerHTML = '<div class="section-title">Previous 7 Days</div>';
+                
+                weekChats.forEach(chat => {
+                    const item = createHistoryItem(chat);
+                    weekSection.appendChild(item);
+                });
+                
+                historyContainer.insertBefore(weekSection, sections[0].nextSibling);
+            }
+            
+            if (olderChats.length > 0) {
+                const olderSection = document.createElement('div');
+                olderSection.className = 'history-section';
+                olderSection.innerHTML = '<div class="section-title">Older</div>';
+                
+                olderChats.forEach(chat => {
+                    const item = createHistoryItem(chat);
+                    olderSection.appendChild(item);
+                });
+                
+                historyContainer.appendChild(olderSection);
+            }
+        }
+
+        function createHistoryItem(chat) {
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            
+            let icon = 'fa-comment';
+            const firstMessage = chat.messages[0].content.toLowerCase();
+            
+            if (firstMessage.includes('code') || firstMessage.includes('program')) {
+                icon = 'fa-code';
+            } else if (firstMessage.includes('search') || firstMessage.includes('find')) {
+                icon = 'fa-search';
+            } else if (firstMessage.includes('research') || firstMessage.includes('study')) {
+                icon = 'fa-microscope';
+            } else if (firstMessage.includes('music') || firstMessage.includes('song')) {
+                icon = 'fa-music';
+            }
+            
+            item.innerHTML = `
+                <i class="fas ${icon}"></i>
+                <span>${chat.title}</span>
+            `;
+            
+            item.addEventListener('click', () => loadChat(chat));
+            return item;
+        }
+
+        function loadChat(chat) {
+            chatContainer.innerHTML = '';
+            welcomeVisible = false;
+            
+            chat.messages.forEach(msg => {
+                addMessage(msg.role, msg.content);
+            });
+            
+            document.querySelectorAll('.history-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const items = document.querySelectorAll('.history-item');
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].textContent.trim() === chat.title) {
+                    items[i].classList.add('active');
+                    break;
+                }
+            }
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        }
+
+        function isSameDay(date1, date2) {
+            return date1.getFullYear() === date2.getFullYear() &&
+                   date1.getMonth() === date2.getMonth() &&
+                   date1.getDate() === date2.getDate();
+        }
+
+        function daysBetween(date1, date2) {
+            const diffTime = Math.abs(date2 - date1);
+            return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function showWelcomeMessage() {
+            if (!welcomeVisible) return;
+            
+            const welcomeHtml = `
+                <div class="welcome-container">
+                    <h1 class="welcome-title">
+                        <img src="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg" class="welcome-logo" alt="Logo">
+                        <span>Mustafa.EDU</span>
+                    </h1>
+                    
+                    <div class="capability-section" id="capability-section">
+                        <div class="section-header">
+                            <i class="fas fa-book"></i>
+                            <span>Library</span>
+                        </div>
+                        <div class="capability-item">
+                            <i class="fas fa-robot"></i>
+                            <span>recordGPT</span>
+                        </div>
+                        <div class="capability-item">
+                            <i class="fas fa-search"></i>
+                            <span>Explore GPTs</span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons" id="action-buttons">
+                        <button class="action-btn" id="search-btn">
+                            <i class="fas fa-search"></i>
+                            Search
+                        </button>
+                        <button class="action-btn" id="reason-btn">
+                            <i class="fas fa-lightbulb"></i>
+                            Reason
+                        </button>
+                        <button class="action-btn" id="research-btn">
+                            <i class="fas fa-microscope"></i>
+                            Deep research
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = welcomeHtml;
+            chatContainer.appendChild(tempDiv);
+            
+            setTimeout(() => {
+                const capSection = document.getElementById('capability-section');
+                const actButtons = document.getElementById('action-buttons');
+                if (capSection) capSection.classList.add('visible');
+                if (actButtons) actButtons.classList.add('visible');
+            }, 100);
+            
+            document.getElementById('search-btn')?.addEventListener('click', () => {
+                addMessage("user", "Perform a web search for this topic");
+                simulateAIResponse("I can perform web searches to get you the latest information. Here's what I found about this topic...");
+            });
+            
+            document.getElementById('reason-btn')?.addEventListener('click', () => {
+                addMessage("user", "Analyze this logically");
+                simulateAIResponse("Let me break this down step by step with logical analysis...");
+            });
+            
+            document.getElementById('research-btn')?.addEventListener('click', () => {
+                addMessage("user", "Do deep research on this");
+                simulateAIResponse("After conducting thorough research, here's a comprehensive analysis...");
+            });
+        }
+
+        function addMessage(role, content, isTyping = false) {
+            if (role === "user" && welcomeVisible) {
+                chatContainer.innerHTML = '';
+                welcomeVisible = false;
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+            
+            const avatar = role === 'assistant' ? 
+                '<div class="avatar"><i class="fas fa-robot"></i></div>' : 
+                '<div class="avatar user-avatar"><i class="fas fa-user"></i></div>';
+            
+            if (isTyping) {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        ${avatar}
+                        <div class="message-text">
+                            <div class="typing-animation"></div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        ${avatar}
+                        <div class="message-text">
+                            <div class="typing-text">${formatContent(content)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            
+            if (!isTyping) {
+                animateTyping(messageDiv);
+                
+                setTimeout(() => {
+                    messageDiv.classList.add('visible');
+                }, 10);
+            }
+            
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const isAtBottom = chatContainer.scrollHeight - chatContainer.clientHeight <= chatContainer.scrollTop + 1;
+            
+            if (!isAtBottom) {
+                chatContainer.scrollTo({
+                    top: chatContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        function formatContent(content) {
+            let formatted = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/`(.*?)`/g, '<code>$1</code>')
+                .replace(/```([\s\S]*?)```/g, (match, code) => {
+                    if (code.includes('/') || code.includes('├──') || code.includes('└──')) {
+                        return `<pre class="folder-structure">${code}</pre>`;
+                    } else {
+                        return `<pre><code>${code}</code></pre>`;
+                    }
+                })
+                .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+                .replace(/\n/g, '<br>');
+            
+            return formatted;
+        }
+
+        function animateTyping(messageDiv) {
+            const typingText = messageDiv.querySelector('.typing-text');
+            const text = typingText.innerHTML;
+            typingText.innerHTML = '';
+            
+            const words = text.split(/(<[^>]+>|[^<]+)/).filter(Boolean);
+            let i = 0;
+            
+            function typeWriter() {
+                if (i < words.length) {
+                    typingText.innerHTML += words[i];
+                    i++;
+                    const delay = Math.random() * 5 + 3;
+                    setTimeout(typeWriter, delay);
+                }
+            }
+            
+            typeWriter();
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message && !imageFile) return;
+            
+            addMessage("user", message);
+            if (imageFile) {
+                addImageMessage(message, imageFile);
+            }
+            
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            sendButton.disabled = true;
+            isProcessing = true;
+            stopButton.style.display = 'block';
+            
+            addMessage("assistant", "", true);
+            
+            try {
+                abortController = new AbortController();
+                
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: []
+                    }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        topP: 1,
+                        topK: 32,
+                        maxOutputTokens: 4096
+                    }
+                };
+
+                if (message) {
+                    payload.contents[0].parts.push({ text: message });
+                }
+
+                if (imageFile) {
+                    const base64Image = await toBase64(imageFile);
+                    payload.contents[0].parts.push({
+                        inlineData: {
+                            mimeType: imageFile.type,
+                            data: base64Image.split(',')[1]
+                        }
+                    });
+                }
+
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload),
+                    signal: abortController.signal
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error?.message || `API request failed with status ${response.status}`);
+                }
+                
+                chatContainer.removeChild(chatContainer.lastChild);
+                
+                if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    const aiResponse = data.candidates[0].content.parts[0].text;
+                    addMessage("assistant", aiResponse);
+                } else if (data.promptFeedback?.blockReason) {
+                    addMessage("assistant", "My response was blocked for safety reasons. Please try a different question.");
+                } else {
+                    throw new Error("Unexpected API response format");
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    if (chatContainer.lastChild.classList.contains('assistant-message')) {
+                        chatContainer.removeChild(chatContainer.lastChild);
+                    }
+                    addMessage("assistant", "Response stopped by user.");
+                } else {
+                    console.error("API Error:", error);
+                    if (chatContainer.lastChild.classList.contains('assistant-message')) {
+                        chatContainer.removeChild(chatContainer.lastChild);
+                    }
+                    addMessage("assistant", `Error: ${error.message}`);
+                }
+            } finally {
+                sendButton.disabled = false;
+                isProcessing = false;
+                stopButton.style.display = 'none';
+                abortController = null;
+                hideImageUpload();
+                userInput.focus();
+            }
+        }
+
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function stopGeneration() {
+            if (abortController) {
+                abortController.abort();
+            }
+            stopButton.style.display = 'none';
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.body.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            currentTheme = savedTheme;
+            document.body.setAttribute('data-theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            themeToggle.innerHTML = currentTheme === 'dark' ? 
+                '<i class="fas fa-moon"></i>' : 
+                '<i class="fas fa-sun"></i>';
+        }
+
+        function toggleImageUpload() {
+            if (imageUploadContainer.style.display === 'block') {
+                hideImageUpload();
+            } else {
+                showImageUpload();
+            }
+        }
+
+        function showImageUpload() {
+            imageUploadContainer.style.display = 'block';
+            userInput.focus();
+        }
+
+        function hideImageUpload() {
+            imageUploadContainer.style.display = 'none';
+            imageFile = null;
+            imagePreview.style.display = 'none';
+            imagePreview.src = '';
+            removeImageBtn.style.display = 'none';
+            imageUpload.value = '';
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image size should be less than 5MB');
+                    return;
+                }
+                
+                imageFile = file;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    imagePreview.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                    removeImageBtn.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            imageFile = null;
+            imagePreview.style.display = 'none';
+            imagePreview.src = '';
+            removeImageBtn.style.display = 'none';
+            imageUpload.value = '';
+        }
+
+        function addImageMessage(text, imageFile) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                messageDiv.innerHTML = `
+                    <div class="message-content">
+                        <div class="avatar user-avatar"><i class="fas fa-user"></i></div>
+                        <div class="message-text">
+                            ${text ? `<strong>${text}</strong><br>` : ''}
+                            <div style="margin-top: 10px;">
+                                <img src="${event.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 8px;">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                setTimeout(() => {
+                    messageDiv.classList.add('visible');
+                }, 10);
+            };
+            reader.readAsDataURL(imageFile);
+            
+            chatContainer.appendChild(messageDiv);
+        }
+
+        function simulateAIResponse(response) {
+            addMessage("assistant", "", true);
+            stopButton.style.display = 'block';
+            
+            setTimeout(() => {
+                chatContainer.removeChild(chatContainer.lastChild);
+                addMessage("assistant", response);
+                stopButton.style.display = 'none';
+            }, 800);
+        }
+
+        // Handle window resize on mobile
+        window.addEventListener('resize', () => {
+            if (isMobile) {
+                document.documentElement.style.height = `${window.innerHeight}px`;
+            }
+        });
+
+        // Prevent pinch zoom on mobile
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+
+        // Add to home screen prompt for iOS
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+        });
     </script>
 </body>
 </html>
