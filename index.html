@@ -10,6 +10,71 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Splash Screen Styles */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .splash-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 24px;
+            object-fit: cover;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        .splash-title {
+            color: #fff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-top: 20px;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.5s forwards;
+        }
+        
+        .splash-loader {
+            width: 80%;
+            max-width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            margin-top: 40px;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out 1s forwards;
+        }
+        
+        .splash-progress {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #10a37f, #19c37d);
+            transition: width 1.5s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Main App Styles */
         :root {
             --bg-primary: #000000;
             --bg-secondary: #111111;
@@ -184,6 +249,14 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .main-content.loaded {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .chat-container {
@@ -197,6 +270,14 @@
         .message {
             padding: 18px 0;
             width: 100%;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+
+        .message.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .message-content {
@@ -260,6 +341,12 @@
             flex-direction: column;
             align-items: center;
             z-index: 100;
+            transform: translateY(0);
+            transition: transform 0.3s ease-out;
+        }
+
+        .input-area.hidden {
+            transform: translateY(100%);
         }
 
         .input-container {
@@ -394,6 +481,16 @@
             font-weight: 600;
             font-size: 18px;
             margin-left: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            object-fit: cover;
         }
 
         .header-actions {
@@ -450,6 +547,17 @@
             font-weight: 600;
             margin-bottom: 30px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .welcome-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
         }
 
         .capability-section {
@@ -457,6 +565,14 @@
             border-radius: 12px;
             padding: 20px;
             margin-bottom: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .capability-section.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .section-header {
@@ -493,6 +609,14 @@
             margin-top: 16px;
             flex-wrap: wrap;
             justify-content: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .action-buttons.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .action-btn {
@@ -595,6 +719,15 @@
             .capability-item {
                 padding-left: 30px;
             }
+            
+            .app-title {
+                font-size: 16px;
+            }
+            
+            .header-logo {
+                width: 24px;
+                height: 24px;
+            }
         }
 
         /* Fast typing animation */
@@ -610,6 +743,15 @@
     </style>
 </head>
 <body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splash-screen">
+        <img src="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg" class="splash-logo" alt="Mustafa.EDU Logo">
+        <h1 class="splash-title">Mustafa.EDU</h1>
+        <div class="splash-loader">
+            <div class="splash-progress" id="splash-progress"></div>
+        </div>
+    </div>
+
     <!-- Overlay for mobile -->
     <div class="overlay" id="overlay"></div>
 
@@ -635,13 +777,16 @@
     </div>
 
     <!-- Main Content -->
-    <div class="main-content">
+    <div class="main-content" id="main-content">
         <!-- App Header -->
         <div class="app-header">
             <button class="header-btn" id="menu-toggle">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="app-title">Mustafa.EDU</div>
+            <div class="app-title">
+                <img src="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg" class="header-logo" alt="Logo">
+                <span>Mustafa.EDU</span>
+            </div>
             <div class="header-actions">
                 <button class="header-btn" id="theme-toggle">
                     <i class="fas fa-moon"></i>
@@ -651,9 +796,12 @@
 
         <div class="chat-container" id="chat-container">
             <div class="welcome-container">
-                <h1 class="welcome-title">Mustafa.EDU</h1>
+                <h1 class="welcome-title">
+                    <img src="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg" class="welcome-logo" alt="Logo">
+                    <span>Mustafa.EDU</span>
+                </h1>
                 
-                <div class="capability-section">
+                <div class="capability-section" id="capability-section">
                     <div class="section-header">
                         <i class="fas fa-book"></i>
                         <span>Library</span>
@@ -668,7 +816,7 @@
                     </div>
                 </div>
                 
-                <div class="action-buttons">
+                <div class="action-buttons" id="action-buttons">
                     <button class="action-btn" id="search-btn">
                         <i class="fas fa-search"></i>
                         Search
@@ -727,6 +875,9 @@
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${API_KEY}`;
         
         // DOM Elements
+        const splashScreen = document.getElementById('splash-screen');
+        const splashProgress = document.getElementById('splash-progress');
+        const mainContent = document.getElementById('main-content');
         const chatContainer = document.getElementById('chat-container');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
@@ -742,6 +893,8 @@
         const imagePreview = document.getElementById('image-preview');
         const uploadImageBtn = document.getElementById('upload-image-btn');
         const removeImageBtn = document.getElementById('remove-image-btn');
+        const capabilitySection = document.getElementById('capability-section');
+        const actionButtons = document.getElementById('action-buttons');
         
         // State
         let isProcessing = false;
@@ -754,30 +907,63 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            setupEventListeners();
-            autoResizeTextarea();
-            applyTheme();
-            loadChatHistory();
+            // Show splash screen first
+            showSplashScreen();
             
-            // Hide browser UI on mobile
-            if (isMobile) {
-                document.body.style.height = window.innerHeight + 'px';
-                window.scrollTo(0, 0);
+            // Then initialize the app
+            setTimeout(() => {
+                setupEventListeners();
+                autoResizeTextarea();
+                applyTheme();
+                loadChatHistory();
                 
-                // Prevent zooming
-                document.addEventListener('gesturestart', function(e) {
-                    e.preventDefault();
-                });
-                
-                // Prevent bouncing on iOS
-                document.addEventListener('touchmove', function(e) {
-                    if (!e.target.classList.contains('history-container') && 
-                        !e.target.classList.contains('chat-container')) {
+                // Hide browser UI on mobile
+                if (isMobile) {
+                    document.body.style.height = window.innerHeight + 'px';
+                    window.scrollTo(0, 0);
+                    
+                    // Prevent zooming
+                    document.addEventListener('gesturestart', function(e) {
                         e.preventDefault();
-                    }
-                }, { passive: false });
-            }
+                    });
+                    
+                    // Prevent bouncing on iOS
+                    document.addEventListener('touchmove', function(e) {
+                        if (!e.target.classList.contains('history-container') && 
+                            !e.target.classList.contains('chat-container')) {
+                            e.preventDefault();
+                        }
+                    }, { passive: false });
+                }
+            }, 100);
         });
+
+        function showSplashScreen() {
+            // Simulate loading progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 100) progress = 100;
+                splashProgress.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        splashScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            splashScreen.style.display = 'none';
+                            mainContent.classList.add('loaded');
+                            
+                            // Animate welcome content
+                            setTimeout(() => {
+                                capabilitySection.classList.add('visible');
+                                actionButtons.classList.add('visible');
+                            }, 300);
+                        }, 500);
+                    }, 300);
+                }
+            }, 100);
+        }
 
         function setupEventListeners() {
             // Send message on Enter (Shift+Enter for new line)
@@ -1089,9 +1275,12 @@
             
             const welcomeHtml = `
                 <div class="welcome-container">
-                    <h1 class="welcome-title">Mustafa.EDU</h1>
+                    <h1 class="welcome-title">
+                        <img src="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg" class="welcome-logo" alt="Logo">
+                        <span>Mustafa.EDU</span>
+                    </h1>
                     
-                    <div class="capability-section">
+                    <div class="capability-section" id="capability-section">
                         <div class="section-header">
                             <i class="fas fa-book"></i>
                             <span>Library</span>
@@ -1106,7 +1295,7 @@
                         </div>
                     </div>
                     
-                    <div class="action-buttons">
+                    <div class="action-buttons" id="action-buttons">
                         <button class="action-btn" id="search-btn">
                             <i class="fas fa-search"></i>
                             Search
@@ -1126,6 +1315,14 @@
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = welcomeHtml;
             chatContainer.appendChild(tempDiv);
+            
+            // Animate welcome content
+            setTimeout(() => {
+                const capSection = document.getElementById('capability-section');
+                const actButtons = document.getElementById('action-buttons');
+                if (capSection) capSection.classList.add('visible');
+                if (actButtons) actButtons.classList.add('visible');
+            }, 100);
             
             // Re-attach event listeners to action buttons
             document.getElementById('search-btn')?.addEventListener('click', () => {
@@ -1183,6 +1380,11 @@
             if (!isTyping) {
                 // Animate typing with very fast speed
                 animateTyping(messageDiv);
+                
+                // Show message with animation
+                setTimeout(() => {
+                    messageDiv.classList.add('visible');
+                }, 10);
             }
             
             scrollToBottom();
@@ -1453,6 +1655,11 @@
                     </div>
                 `;
                 chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Show message with animation
+                setTimeout(() => {
+                    messageDiv.classList.add('visible');
+                }, 10);
             };
             reader.readAsDataURL(imageFile);
             
