@@ -1,15 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- PWA Required Meta Tags -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg">
+    
+    <!-- Inline Web App Manifest -->
+    <link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogIk11c3RhZmEuRURVIiwKICAic2hvcnRfbmFtZSI6ICJNdXN0YWZhLkVEVSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3IiOiAiIzAwMDAwMCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLnNvbG8udG8vdXNlci9hLzY2OGQ5NGJhYzFhNzc0XzkyNDgyMjQ4LmpwZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4uc29sby50by91c2VyL2EvNjY4ZDk0YmFjMWE3NzRfOTI0ODIyNDguanBnIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIgogICAgfQogIF0KfQ==">
+    
     <title>Mustafa.EDU</title>
     <link rel="icon" href="https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg" type="image/jpeg">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIk11c3RhZmEuRURVIiwKICAic2hvcnRfbmFtZSI6ICJNdXN0YWZhLkVEVSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDAwMDAwIiwKICAidGhlbWVfY29sb3IiOiAiIzAwMDAwMCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLnNvbG8udG8vdXNlci9hLzY2OGQ5NGJhYzFhNzc0XzkyNDgyMjQ4LmpwZyIsCiAgICAgICJzaXplcyI6ICIxOTJ4MTkyIiwKICAgICAgInR5cGUiOiAiaW1hZ2UvanBlZyIKICAgIH0sCiAgICB7CiAgICAgICJzcmMiOiAiaHR0cHM6Ly9jZG4uc29sby50by91c2VyL2EvNjY4ZDk0YmFjMWE3NzRfOTI0ODIyNDguanBnIiwKICAgICAgInNpemVzIjogIjUxMng1MTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9qcGVnIgogICAgfQogIF0KfQ==">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -957,6 +964,40 @@
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('data:application/javascript;base64,' + btoa(`
+                    const CACHE_NAME = 'mustafa-edu-v1';
+                    const urlsToCache = [
+                        '/',
+                        '/index.html',
+                        'https://cdn.solo.to/user/a/668d94bac1a774_92482248.jpg',
+                        'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap',
+                        'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+                    ];
+
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(cache => cache.addAll(urlsToCache))
+                        );
+                    });
+
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(response => response || fetch(event.request))
+                        );
+                    });
+                `))
+                .then(registration => {
+                    console.log('ServiceWorker registration successful');
+                })
+                .catch(err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            }
+
             // Show splash screen first
             showSplashScreen();
             
@@ -973,11 +1014,20 @@
                 }
                 
                 // Check if app is running in standalone mode
-                if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+                if (isRunningAsPWA()) {
+                    console.log("Running as PWA");
                     installBtn.style.display = 'none';
+                } else {
+                    console.log("Running in browser");
                 }
             }, 100);
         });
+
+        function isRunningAsPWA() {
+            return window.matchMedia('(display-mode: standalone)').matches || 
+                   window.navigator.standalone ||
+                   document.referrer.includes('android-app://');
+        }
 
         function setupMobileAppBehavior() {
             // Set full height
